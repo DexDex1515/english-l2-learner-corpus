@@ -25,6 +25,7 @@ with os.scandir(ESSAY_DIR) as all_essays:
         if entry.name in mandarin_ids:
             with open(os.path.join(ESSAY_DIR, entry.name)) as essay:
                 mandarin_dict[entry.name] = essay.read()
+                # Notice: essay.read() will contain \n symbols
                 copy(os.path.join(ESSAY_DIR, entry.name), MANDARIN_DIR)
 
 SPANISH_DIR = '../data/ETS_Corpus_of_Non-Native_Written_English/text/responses/spanish_only/'
