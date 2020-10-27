@@ -63,6 +63,8 @@ ZHO_the_count = []
 ZHO_the_freq = []
 ZHO_aan_count = []
 ZHO_aan_freq = []
+ZHO_one_count = []
+ZHO_one_freq = []
 ZHO_demo_sing_count = [] # demonstratives singular
 ZHO_demo_sing_freq = []
 ZHO_demo_pl_count = [] # demonstratives plural
@@ -73,6 +75,8 @@ SPA_the_count = []
 SPA_the_freq = []
 SPA_aan_count = []
 SPA_aan_freq = []
+SPA_one_count = []
+SPA_one_freq = []
 SPA_demo_sing_count = [] # demonstratives singular
 SPA_demo_sing_freq = []
 SPA_demo_pl_count = [] # demonstratives plural
@@ -84,10 +88,13 @@ for i in range(len(corpus_ZHO)):
     ZHO_the_count.append(num_the)
     ZHO_the_freq.append(float(num_the / ZHO_length[i]))
 
-    # a, an
+    # a, an, one
     num_ind = corpus_ZHO[i].count('a') + corpus_ZHO[i].count('an')
     ZHO_aan_count.append(num_ind)
     ZHO_aan_freq.append(float(num_ind / ZHO_length[i]))
+    num_one = corpus_ZHO[i].count('one')
+    ZHO_one_count.append(num_one)
+    ZHO_one_freq.append(float(num_one / ZHO_length[i]))
 
     # demonstratives
     num_dem_sing = corpus_ZHO[i].count('this') + corpus_ZHO[i].count('that')
@@ -103,10 +110,13 @@ for i in range(len(corpus_SPA)):
     SPA_the_count.append(num_the)
     SPA_the_freq.append(float(num_the / SPA_length[i]))
 
-    # a, an
+    # a, an, one
     num_ind = corpus_SPA[i].count('a') + corpus_SPA[i].count('an')
     SPA_aan_count.append(num_ind)
     SPA_aan_freq.append(float(num_ind / SPA_length[i]))
+    num_one = corpus_SPA[i].count('one')
+    SPA_one_count.append(num_one)
+    SPA_one_freq.append(float(num_one / SPA_length[i]))
 
     # demonstratives
     num_dem_sing = corpus_SPA[i].count('this') + corpus_SPA[i].count('that')
@@ -121,6 +131,8 @@ mandarin_L1['the_count'] = ZHO_the_count
 mandarin_L1['the_freq'] = ZHO_the_freq
 mandarin_L1['aan_count'] = ZHO_aan_count
 mandarin_L1['aan_freq'] = ZHO_aan_freq
+mandarin_L1['one_count'] = ZHO_one_count
+mandarin_L1['one_freq'] = ZHO_one_freq
 mandarin_L1['demo_sing_count'] = ZHO_demo_sing_count
 mandarin_L1['demo_sing_freq'] = ZHO_demo_sing_freq
 mandarin_L1['demo_pl_count'] = ZHO_demo_pl_count
@@ -130,6 +142,8 @@ spanish_L1['the_count'] = SPA_the_count
 spanish_L1['the_freq'] = SPA_the_freq
 spanish_L1['aan_count'] = SPA_aan_count
 spanish_L1['aan_freq'] = SPA_aan_freq
+spanish_L1['one_count'] = SPA_one_count
+spanish_L1['one_freq'] = SPA_one_freq
 spanish_L1['demo_sing_count'] = SPA_demo_sing_count
 spanish_L1['demo_sing_freq'] = SPA_demo_sing_freq
 spanish_L1['demo_pl_count'] = SPA_demo_pl_count
