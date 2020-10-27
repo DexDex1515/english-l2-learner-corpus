@@ -1,0 +1,16 @@
+---
+title: "explore_anc"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(tidyverse)
+options(stringsAsFactors=F)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+plos <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/plos.csv')
+head(plos)
+ggplot(plos, aes(x=num_sent, y=freq_the)) + geom_point() + stat_smooth(method='lm')
+```
