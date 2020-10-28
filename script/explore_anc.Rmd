@@ -14,3 +14,10 @@ plos <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/plos
 head(plos)
 ggplot(plos, aes(x=num_sent, y=freq_the)) + geom_point() + stat_smooth(method='lm')
 ```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/mandarin_l1.csv')
+head(mandarin)
+ggplot(mandarin, aes(x=num_sentence, y=the_freq, color=Score Level)) + geom_point() + stat_smooth(method='lm')
+```
+
