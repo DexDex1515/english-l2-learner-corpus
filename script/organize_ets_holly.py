@@ -73,7 +73,7 @@ with os.scandir(DATA_DIR) as all_files:
         for word in word_freq:
             word_freq[word] = word_count[word] / all_word_count 
 
-        row_to_write = [str(entry.name).strip('.txt'), score_dict[entry.name], num_sent, all_word_count, (num_sent / all_word_count)] + list(word_count.values()) + list(word_freq.values())
+        row_to_write = [str(entry.name).strip('.txt'), score_dict[entry.name], num_sent, all_word_count, (all_word_count / num_sent)] + list(word_count.values()) + list(word_freq.values())
         csv_writer.writerow(row_to_write)
 
 csv_file.close()
