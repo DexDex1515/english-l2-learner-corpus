@@ -1,0 +1,23 @@
+---
+title: "explore_anc"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(tidyverse)
+options(stringsAsFactors=F)
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/mandarin_l1_holly.csv')
+head(mandarin)
+ggplot(mandarin, aes(x=num_sent, y=freq_the, color=score_level)) + geom_point() + stat_smooth(method='lm')
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(mandarin, aes(x=num_sentence, y=demo_sing_freq, color=Score_Level)) + geom_point() + stat_smooth(method='lm')
+``` 
+
