@@ -18,6 +18,16 @@ ggplot(plos, aes(x=num_sent, y=freq_the)) + geom_point() + stat_smooth(method='l
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/mandarin_l1.csv')
 head(mandarin)
-ggplot(mandarin, aes(x=num_sentence, y=the_freq, color=Score Level)) + geom_point() + stat_smooth(method='lm')
+ggplot(mandarin, aes(x=num_sentence, y=the_freq, color=Score_Level)) + geom_point() + stat_smooth(method='lm')
 ```
 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(mandarin, aes(x=num_sentence, y=demo_sing_freq, color=Score_Level)) + geom_point() + stat_smooth(method='lm')
+``` 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(plos, aes(x=num_sent, y=freq_this)) + geom_point() + stat_smooth(method='lm')
+```
+The frequency of "this" is around 0.8% in PLOS articles, and around 2% in Mandarin ETS articles.
