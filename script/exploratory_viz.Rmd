@@ -13,11 +13,11 @@ options(stringsAsFactors=F)
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/mandarin_l1_holly.csv')
 head(mandarin)
-ggplot(mandarin, aes(x=num_sent, y=freq_the, color=score_level)) + geom_point() + stat_smooth(method='lm')
+ggplot(mandarin, aes(x=average_sent_length, y=freq_the, color=score_level)) + xlim(5,50) + geom_point() + stat_smooth(method='lm')
 ```
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(mandarin, aes(x=num_sentence, y=demo_sing_freq, color=Score_Level)) + geom_point() + stat_smooth(method='lm')
+ggplot(mandarin, aes(x=freq_the, y=freq_a, color=score_level)) + geom_point() + stat_smooth(method='lm')
 ``` 
 
