@@ -1,4 +1,5 @@
 import nltk.data
+from nltk.stem.snowball import SnowballStemmer
 #nltk.download('punkt')
 import os
 import csv
@@ -6,6 +7,7 @@ from pdb import set_trace as bp
 
 # download the English tokenizer from NLTK
 sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
+stemmer = SnowballStemmer("english")
 
 # build a dictionary that maps each essay's file id to its score level
 INDEX_FILE = "../data/ETS_Corpus_of_Non-Native_Written_English/data/text/index.csv"
@@ -15,13 +17,14 @@ with open(INDEX_FILE) as index_csv:
     for row in reader:
         score_dict[row["Filename"]] = row["Score Level"]
 
-DATA_DIR = "../data/ETS_Corpus_of_Non-Native_Written_English/data/text/responses/mandarin_only/"
-CSV_FILE_NAME = '../cleaned_csv/mandarin_l1_holly.csv'
+DATA_DIR = "../data/ETS_Corpus_of_Non-Native_Written_English/data/text/responses/spanish_only/"
+CSV_FILE_NAME = '../cleaned_csv/spanish_l1_lemmatizer_column.csv'
 
 csv_file = open(CSV_FILE_NAME, 'w', newline='')
 csv_writer = csv.writer(csv_file, delimiter=',')
-csv_writer.writerow(
-    ['file_id', 'score_level', 'num_sent', 'word_count', 'average_sent_length', 'count_the', 'count_this', 'count_that', 'count_these', 'count_those', 'count_a', 'count_an', 'count_one', 'freq_the', 'freq_this', 'freq_that', 'freq_these', 'freq_those', 'freq_a', 'freq_an', 'freq_one'])
+#csv_writer.writerow(
+#    ['file_id', 'score_level', 'num_sent', 'word_count', 'average_sent_length', 'count_the', 'count_this', 'count_that', 'count_these', 'count_those', 'count_a', 'count_an', 'count_one', 'freq_the', 'freq_this', 'freq_that', 'freq_these', 'freq_those', 'freq_a', 'freq_an', 'freq_one'])
+csv_writer.writerow(['file_id', 'num_uniq_word'])
 
 with os.scandir(DATA_DIR) as all_files:
     for entry in all_files:
@@ -42,6 +45,7 @@ with os.scandir(DATA_DIR) as all_files:
         }
 
         all_word_count = 0
+        unique_words = set()
 
         for sentence_string in tokenized_sentences:
             sentence = sentence_string.split()
@@ -57,6 +61,10 @@ with os.scandir(DATA_DIR) as all_files:
 
             for word in cleaned_sentence:
                 cleaned_word = word.lower().strip(",.!?#()[]{}'\"")
+                stemmed_word = stemmer.stem(cleaned_word)
+                if stemmed_word not in unique_words:
+                    unique_words.add(stemmed_word)
+                
                 if cleaned_word in word_count:
                     word_count[cleaned_word] += 1
 
@@ -73,7 +81,8 @@ with os.scandir(DATA_DIR) as all_files:
         for word in word_freq:
             word_freq[word] = word_count[word] / all_word_count 
 
-        row_to_write = [str(entry.name).strip('.txt'), score_dict[entry.name], num_sent, all_word_count, (all_word_count / num_sent)] + list(word_count.values()) + list(word_freq.values())
+        #row_to_write = [str(entry.name), score_dict[entry.name], num_sent, all_word_count, (all_word_count / num_sent)] + list(word_count.values()) + list(word_freq.values())
+        row_to_write = [str(entry.name), len(unique_words)]
         csv_writer.writerow(row_to_write)
 
 csv_file.close()
