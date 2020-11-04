@@ -31,6 +31,7 @@ for f in ZHO_file:
         arr = line.strip().split()
         essay += arr
         if not len(arr) == 0:
+			
             num_sentence += 1
     temp.close()
     essay = [x for x in essay if x not in puncs] # leave out punctuations
