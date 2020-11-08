@@ -20,6 +20,7 @@ puncs = [',', '.', '!', '?', ':', ';', '(', ')', "'", '"']
 verb_tag = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
 noun_tag = ['NN', 'NNS', 'NNS', 'NNP', 'NNPS']
 adj_tag = ['JJ', 'JJR', 'JJS']
+det_in_question = ['the', 'a', 'an', 'this', 'that', 'these', 'those']
 
 
 '''MANDARIN L1'''
@@ -32,6 +33,7 @@ ZHO_this_count = []
 ZHO_that_count = []
 ZHO_these_count = []
 ZHO_those_count = []
+ZHO_other_det_count = []
 ZHO_noun_count = []
 ZHO_verb_count = []
 ZHO_modal_count = []
@@ -84,6 +86,8 @@ for f in ZHO_file:
 	ZHO_that_count.append(determiners.count('that'))
 	ZHO_these_count.append(determiners.count('these'))
 	ZHO_those_count.append(determiners.count('those'))
+	determiners = [x for x in determiners if x not in det_in_question]
+	ZHO_other_det_count.append(len(determiners))
 	ZHO_noun_count.append(len(nouns))
 	ZHO_verb_count.append(len(verbs))
 	ZHO_adj_count.append(len(adjs))
@@ -108,6 +112,7 @@ mandarin_L1['this_count'] = ZHO_this_count
 mandarin_L1['that_count'] = ZHO_that_count
 mandarin_L1['these_count'] = ZHO_these_count
 mandarin_L1['those_count'] = ZHO_those_count
+mandarin_L1['other_det_count'] = ZHO_other_det_count
 mandarin_L1['the_freq'] = mandarin_L1['the_count'] / mandarin_L1['essay_len']
 mandarin_L1['aan_freq'] = mandarin_L1['aan_count'] / mandarin_L1['essay_len']
 mandarin_L1['one_freq'] = mandarin_L1['one_count'] / mandarin_L1['essay_len']
@@ -115,6 +120,7 @@ mandarin_L1['this_freq'] = mandarin_L1['this_count'] / mandarin_L1['essay_len']
 mandarin_L1['that_freq'] = mandarin_L1['that_count'] / mandarin_L1['essay_len']
 mandarin_L1['these_freq'] = mandarin_L1['these_count'] / mandarin_L1['essay_len']
 mandarin_L1['those_freq'] = mandarin_L1['those_count'] / mandarin_L1['essay_len']
+mandarin_L1['other_det_freq'] = mandarin_L1['other_det_count'] / mandarin_L1['essay_len']
 
 
 '''SPANISH L1'''
@@ -127,6 +133,7 @@ SPA_this_count = []
 SPA_that_count = []
 SPA_these_count = []
 SPA_those_count = []
+SPA_other_det_count = []
 SPA_noun_count = []
 SPA_verb_count = []
 SPA_modal_count = []
@@ -179,6 +186,8 @@ for f in SPA_file:
 	SPA_that_count.append(determiners.count('that'))
 	SPA_these_count.append(determiners.count('these'))
 	SPA_those_count.append(determiners.count('those'))
+	determiners = [x for x in determiners if x not in det_in_question]
+	SPA_other_det_count.append(len(determiners))
 	SPA_noun_count.append(len(nouns))
 	SPA_verb_count.append(len(verbs))
 	SPA_adj_count.append(len(adjs))
@@ -203,6 +212,7 @@ spanish_L1['this_count'] = SPA_this_count
 spanish_L1['that_count'] = SPA_that_count
 spanish_L1['these_count'] = SPA_these_count
 spanish_L1['those_count'] = SPA_those_count
+spanish_L1['other_det_count'] = SPA_other_det_count
 spanish_L1['the_freq'] = spanish_L1['the_count'] / spanish_L1['essay_len']
 spanish_L1['aan_freq'] = spanish_L1['aan_count'] / spanish_L1['essay_len']
 spanish_L1['one_freq'] = spanish_L1['one_count'] / spanish_L1['essay_len']
@@ -210,7 +220,7 @@ spanish_L1['this_freq'] = spanish_L1['this_count'] / spanish_L1['essay_len']
 spanish_L1['that_freq'] = spanish_L1['that_count'] / spanish_L1['essay_len']
 spanish_L1['these_freq'] = spanish_L1['these_count'] / spanish_L1['essay_len']
 spanish_L1['those_freq'] = spanish_L1['those_count'] / spanish_L1['essay_len']
-
+spanish_L1['other_det_freq'] = spanish_L1['other_det_count'] / spanish_L1['essay_len']
 
 
 '''Output as .csv'''
