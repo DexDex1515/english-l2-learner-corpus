@@ -1,5 +1,5 @@
 ---
-title: "explore_anc"
+title: "exploratory_visualizations"
 output: html_document
 ---
 
@@ -10,14 +10,47 @@ options(stringsAsFactors=F)
 ```
 
 
+Load data for Mandarin
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/mandarin_l1_holly.csv')
+mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/mandarin_L1_nltk.csv')
 head(mandarin)
-ggplot(mandarin, aes(x=average_sent_length, y=freq_the, color=score_level)) + xlim(5,50) + geom_point() + stat_smooth(method='lm')
+count_uniq_words_mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/mandarin_l1_lemmatizer_column.csv')
+head(count_uniq_words_mandarin)
+
+combined <- inner_join(mandarin, count_uniq_words_mandarin, by=c("Filename"="file_id"))
+head(combined)
+```
+
+Higher number of unique words do somewhat lead to higher score level
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+num_uniq_word_by_score <- combined %>%
+  group_by(Score_Level) %>%
+  summarize(median=median(num_uniq_word))
+head(num_uniq_word_by_score)
+
+combined %>%
+  ggplot(aes(x=num_uniq_word, color=Score_Level, fill=Score_Level)) +
+  geom_density(alpha=0.3,size=1)+ 
+  geom_vline(data=num_uniq_word_by_score, aes(xintercept = median, color = Score_Level), size=1.5)+ 
+  labs(x= "Num uniq word",
+       subtitle="Number of uniq words, by score level")+
+  theme(legend.position="bottom")
+``` 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(lm(combined$noun_per_sentence~combined$num_uniq_word))
+ggplot(combined, aes(x=log(num_uniq_word), y=noun_per_sentence/verb_per_sentence)) + geom_point() + stat_smooth(method='lm')
 ```
 
 
+Number of nouns and number of "the" has quite a positive correlation , which is not surprising because most of nouns need some sort of determiner in English. 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(mandarin, aes(x=freq_the, y=freq_a, color=score_level)) + geom_point() + stat_smooth(method='lm')
+ggplot(combined, aes(x=log(noun_per_sentence), y=the_freq)) + geom_point() + stat_smooth(method='lm')
+ggplot(combined, aes(x=noun_count, y=the_count, color=Score_Level)) + geom_point() + stat_smooth(method='lm')
 ``` 
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(combined, aes(x=noun_per_sentence, y=this_freq, color=Score_Level)) + geom_point() + stat_smooth(method='lm')
+```
