@@ -1,0 +1,157 @@
+---
+title: "11_8_holly"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(tidyverse)
+options(stringsAsFactors=F)
+```
+
+
+Load data for Mandarin corpus
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/mandarin_L1_nltk.csv')
+head(mandarin)
+count_uniq_words_mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/mandarin_l1_lemmatizer_column.csv')
+head(count_uniq_words_mandarin)
+
+combined_mandarin <- inner_join(mandarin, count_uniq_words_mandarin, by=c("Filename"="file_id"))
+head(combined_mandarin)
+```
+
+Load data for Spanish corpus
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+spanish <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/spanish_L1_nltk.csv')
+head(spanish)
+count_uniq_words_spanish <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/spanish_l1_lemmatizer_column.csv')
+head(count_uniq_words_spanish)
+
+combined_spanish <- inner_join(spanish, count_uniq_words_spanish, by=c("Filename"="file_id"))
+head(combined_spanish)
+```
+
+
+Higher number of unique words do somewhat lead to higher score level
+
+Mandarin
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+num_uniq_word_by_score_mandarin <- combined_mandarin %>%
+  group_by(Score_Level) %>%
+  summarize(median=median(num_uniq_word))
+head(num_uniq_word_by_score_mandarin)
+
+combined_mandarin %>%
+  ggplot(aes(x=num_uniq_word, color=Score_Level, fill=Score_Level)) +
+  geom_density(alpha=0.3,size=1)+ 
+  geom_vline(data=num_uniq_word_by_score_mandarin, aes(xintercept = median, color = Score_Level), size=1.5)+ 
+  labs(x= "Number of unique words in an essay",
+       subtitle="Number of uniq words, by score level, Mandarin native speaker corpus")+
+  theme(legend.position="bottom")
+``` 
+
+Spanish 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+num_uniq_word_by_score_spanish <- combined_spanish %>%
+  group_by(Score_Level) %>%
+  summarize(median=median(num_uniq_word))
+head(num_uniq_word_by_score_spanish)
+
+combined_spanish %>%
+  ggplot(aes(x=num_uniq_word, color=Score_Level, fill=Score_Level)) +
+  geom_density(alpha=0.3,size=1)+ 
+  geom_vline(data=num_uniq_word_by_score_spanish, aes(xintercept = median, color = Score_Level), size=1.5)+ 
+  labs(x= "Number of unique words in an essay",
+       subtitle="Number of uniq words, by score level, Spanish native speaker corpus") +
+  theme(legend.position="bottom")
+``` 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(lm(combined_mandarin$noun_per_sentence~combined_mandarin$num_uniq_word))
+ggplot(combined_mandarin, aes(x=log(num_uniq_word), y=noun_per_sentence/verb_per_sentence)) + geom_point() + stat_smooth(method='lm')
+```
+
+
+Number of nouns and number of "the" has quite a positive correlation , which is not surprising because most of nouns need some sort of determiner in English. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(combined_mandarin, aes(x=noun_count, y=the_count, color=Score_Level)) + geom_point() + stat_smooth(method='lm')
+``` 
+
+
+Plotting num uniq word vs. the freq
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+combined_mandarin %>%
+  ggplot(aes(x=num_uniq_word, y=this_freq, color=Score_Level)) +
+  geom_point() +
+  stat_smooth(method='lm') +
+  labs(x= "Number of unique words in an essay",
+        subtitle="Number of uniq words vs. Frequency of \"the\", Mandarin corpus")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+combined_spanish %>%
+  ggplot(aes(x=num_uniq_word, y=this_freq, color=Score_Level)) +
+  geom_point() +
+  stat_smooth(method='lm') +
+  labs(x= "Number of unique words in an essay",
+        subtitle="Number of uniq words vs. Frequency of \"the\", Spanish corpus")
+```
+
+
+Only looking at essays with high scores
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+mandarin_high <-
+  combined_mandarin %>%
+  filter(Score_Level=="high") %>%
+  select(Filename, Language, Score_Level, num_uniq_word, the_freq)
+nrow(mandarin_high)
+summary(lm(mandarin_high$the_freq~mandarin_high$num_uniq_word))
+
+spanish_high <-
+  combined_spanish %>%
+  filter(Score_Level=="high") %>%
+  select(Filename, Language, Score_Level, num_uniq_word, the_freq)
+nrow(spanish_high)
+
+combined_high_score <- rbind(mandarin_high, spanish_high)
+nrow(combined_high_score)
+
+combined_high_score %>%
+  ggplot(aes(x=num_uniq_word, y=the_freq, color=Language)) + 
+  geom_point() +
+  stat_smooth(method='lm') +
+  labs(x= "Number of unique words in an essay",
+       y= "Proportion of \"the\" over all words in an essay", 
+        subtitle="Number of uniq words vs. Frequency of \"the\", \"High\" scores from both corpora")
+
+```
+
+Only looking at essays with low scores
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+mandarin_low <-
+  combined_mandarin %>%
+  filter(Score_Level=="low") %>%
+  select(Filename, Language, Score_Level, num_uniq_word, the_freq)
+nrow(mandarin_low)
+summary(lm(mandarin_high$the_freq~mandarin_high$num_uniq_word))
+
+spanish_low <-
+  combined_spanish %>%
+  filter(Score_Level=="low") %>%
+  select(Filename, Language, Score_Level, num_uniq_word, the_freq)
+nrow(spanish_low)
+
+combined_low_score <- rbind(mandarin_low, spanish_low)
+nrow(combined_low_score)
+
+combined_low_score %>%
+  ggplot(aes(x=num_uniq_word, y=the_freq, color=Language)) + 
+  geom_point() +
+  stat_smooth(method='lm') +
+  labs(x= "Number of unique words in an essay",
+       y= "Proportion of \"the\" over all words in an essay", 
+        subtitle="Number of uniq words vs. Frequency of \"the\", \"Low\" scores from both corpora")
+
+```

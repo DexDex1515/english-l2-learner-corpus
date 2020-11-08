@@ -16,7 +16,6 @@ mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/
 head(mandarin)
 count_uniq_words_mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/mandarin_l1_lemmatizer_column.csv')
 head(count_uniq_words_mandarin)
-
 combined <- inner_join(mandarin, count_uniq_words_mandarin, by=c("Filename"="file_id"))
 head(combined)
 ```
@@ -28,7 +27,6 @@ num_uniq_word_by_score <- combined %>%
   group_by(Score_Level) %>%
   summarize(median=median(num_uniq_word))
 head(num_uniq_word_by_score)
-
 combined %>%
   ggplot(aes(x=num_uniq_word, color=Score_Level, fill=Score_Level)) +
   geom_density(alpha=0.3,size=1)+ 
