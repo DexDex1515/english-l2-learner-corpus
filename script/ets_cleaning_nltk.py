@@ -21,7 +21,16 @@ verb_tag = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
 noun_tag = ['NN', 'NNS', 'NNS', 'NNP', 'NNPS']
 adj_tag = ['JJ', 'JJR', 'JJS']
 det_in_question = ['the', 'a', 'an', 'this', 'that', 'these', 'those']
+PRPs = ['my', 'our', 'your', 'his', 'her', 'their']
 
+def find_PRP(tagged):
+	count = 0
+	for i in range(len(tagged) - 1):
+		pair = tagged[i]
+		next_pair = tagged[i + 1]
+		if pair[0] in PRPs and next_pair[1] in noun_tag:
+			count += 1
+	return count
 
 '''MANDARIN L1'''
 ZHO_length = []
@@ -38,6 +47,7 @@ ZHO_noun_count = []
 ZHO_verb_count = []
 ZHO_modal_count = []
 ZHO_adj_count = []
+ZHO_PRP_count = []
 
 for f in ZHO_file:
 	f_name = ZHO_path + f
@@ -50,6 +60,7 @@ for f in ZHO_file:
 	adjs = []
 	modal = []
 	words = 0 # number of words
+	prp = 0
 	for line in temp:
 		arr = line.strip().split()
 		if not len(arr) == 0:
@@ -64,6 +75,7 @@ for f in ZHO_file:
 			a = np.array([x for x in tagged if x[1] in adj_tag])
 			m = np.array([x for x in tagged if x[1] == 'MD'])
 			ones += len(one)
+			prp += find_PRP(tagged)
 			if dt.shape[0] != 0:
 				determiners += list(dt[:, 0])
 			if n.shape[0] != 0:
@@ -92,6 +104,7 @@ for f in ZHO_file:
 	ZHO_verb_count.append(len(verbs))
 	ZHO_adj_count.append(len(adjs))
 	ZHO_modal_count.append(len(modal))
+	ZHO_PRP_count.append(prp)
 
 mandarin_L1['essay_len'] = ZHO_length
 mandarin_L1['num_sentence'] = ZHO_num_sentences
@@ -100,10 +113,10 @@ mandarin_L1['noun_count'] = ZHO_noun_count
 mandarin_L1['verb_count'] = ZHO_verb_count
 mandarin_L1['adj_count'] = ZHO_adj_count
 mandarin_L1['modal_count'] = ZHO_modal_count
-mandarin_L1['noun/sentence'] = mandarin_L1['noun_count'] / mandarin_L1['num_sentence']
-mandarin_L1['verb/sentence'] = mandarin_L1['verb_count'] / mandarin_L1['num_sentence']
-mandarin_L1['adj/sentence'] = mandarin_L1['adj_count'] / mandarin_L1['num_sentence']
-mandarin_L1['modal/sentence'] = mandarin_L1['modal_count'] / mandarin_L1['num_sentence']
+mandarin_L1['noun_per_sentence'] = mandarin_L1['noun_count'] / mandarin_L1['num_sentence']
+mandarin_L1['verb_per_sentence'] = mandarin_L1['verb_count'] / mandarin_L1['num_sentence']
+mandarin_L1['adj_per_sentence'] = mandarin_L1['adj_count'] / mandarin_L1['num_sentence']
+mandarin_L1['modal_per_sentence'] = mandarin_L1['modal_count'] / mandarin_L1['num_sentence']
 
 mandarin_L1['the_count'] = ZHO_the_count
 mandarin_L1['aan_count'] = ZHO_aan_count
@@ -113,6 +126,7 @@ mandarin_L1['that_count'] = ZHO_that_count
 mandarin_L1['these_count'] = ZHO_these_count
 mandarin_L1['those_count'] = ZHO_those_count
 mandarin_L1['other_det_count'] = ZHO_other_det_count
+mandarin_L1['PRP_count'] = ZHO_PRP_count
 mandarin_L1['the_freq'] = mandarin_L1['the_count'] / mandarin_L1['essay_len']
 mandarin_L1['aan_freq'] = mandarin_L1['aan_count'] / mandarin_L1['essay_len']
 mandarin_L1['one_freq'] = mandarin_L1['one_count'] / mandarin_L1['essay_len']
@@ -121,6 +135,7 @@ mandarin_L1['that_freq'] = mandarin_L1['that_count'] / mandarin_L1['essay_len']
 mandarin_L1['these_freq'] = mandarin_L1['these_count'] / mandarin_L1['essay_len']
 mandarin_L1['those_freq'] = mandarin_L1['those_count'] / mandarin_L1['essay_len']
 mandarin_L1['other_det_freq'] = mandarin_L1['other_det_count'] / mandarin_L1['essay_len']
+mandarin_L1['PRP_freq'] = mandarin_L1['PRP_count'] / mandarin_L1['essay_len']
 
 
 '''SPANISH L1'''
@@ -138,6 +153,7 @@ SPA_noun_count = []
 SPA_verb_count = []
 SPA_modal_count = []
 SPA_adj_count = []
+SPA_PRP_count = []
 
 for f in SPA_file:
 	f_name = SPA_path + f
@@ -150,6 +166,7 @@ for f in SPA_file:
 	adjs = []
 	modal = []
 	words = 0 # number of words
+	prp = 0
 	for line in temp:
 		arr = line.strip().split()
 		if not len(arr) == 0:
@@ -164,6 +181,7 @@ for f in SPA_file:
 			a = np.array([x for x in tagged if x[1] in adj_tag])
 			m = np.array([x for x in tagged if x[1] == 'MD'])
 			ones += len(one)
+			prp += find_PRP(tagged)
 			if dt.shape[0] != 0:
 				determiners += list(dt[:, 0])
 			if n.shape[0] != 0:
@@ -192,6 +210,7 @@ for f in SPA_file:
 	SPA_verb_count.append(len(verbs))
 	SPA_adj_count.append(len(adjs))
 	SPA_modal_count.append(len(modal))
+	SPA_PRP_count.append(prp)
 
 spanish_L1['essay_len'] = SPA_length
 spanish_L1['num_sentence'] = SPA_num_sentences
@@ -200,10 +219,10 @@ spanish_L1['noun_count'] = SPA_noun_count
 spanish_L1['verb_count'] = SPA_verb_count
 spanish_L1['adj_count'] = SPA_adj_count
 spanish_L1['modal_count'] = SPA_modal_count
-spanish_L1['noun/sentence'] = spanish_L1['noun_count'] / spanish_L1['num_sentence']
-spanish_L1['verb/sentence'] = spanish_L1['verb_count'] / spanish_L1['num_sentence']
-spanish_L1['adj/sentence'] = spanish_L1['adj_count'] / spanish_L1['num_sentence']
-spanish_L1['modal/sentence'] = spanish_L1['modal_count'] / spanish_L1['num_sentence']
+spanish_L1['noun_per_sentence'] = spanish_L1['noun_count'] / spanish_L1['num_sentence']
+spanish_L1['verb_per_sentence'] = spanish_L1['verb_count'] / spanish_L1['num_sentence']
+spanish_L1['adj_per_sentence'] = spanish_L1['adj_count'] / spanish_L1['num_sentence']
+spanish_L1['modal_per_sentence'] = spanish_L1['modal_count'] / spanish_L1['num_sentence']
 
 spanish_L1['the_count'] = SPA_the_count
 spanish_L1['aan_count'] = SPA_aan_count
@@ -213,6 +232,7 @@ spanish_L1['that_count'] = SPA_that_count
 spanish_L1['these_count'] = SPA_these_count
 spanish_L1['those_count'] = SPA_those_count
 spanish_L1['other_det_count'] = SPA_other_det_count
+spanish_L1['PRP_count'] = SPA_PRP_count
 spanish_L1['the_freq'] = spanish_L1['the_count'] / spanish_L1['essay_len']
 spanish_L1['aan_freq'] = spanish_L1['aan_count'] / spanish_L1['essay_len']
 spanish_L1['one_freq'] = spanish_L1['one_count'] / spanish_L1['essay_len']
@@ -221,6 +241,7 @@ spanish_L1['that_freq'] = spanish_L1['that_count'] / spanish_L1['essay_len']
 spanish_L1['these_freq'] = spanish_L1['these_count'] / spanish_L1['essay_len']
 spanish_L1['those_freq'] = spanish_L1['those_count'] / spanish_L1['essay_len']
 spanish_L1['other_det_freq'] = spanish_L1['other_det_count'] / spanish_L1['essay_len']
+spanish_L1['PRP_freq'] = spanish_L1['PRP_count'] / spanish_L1['essay_len']
 
 
 '''Output as .csv'''
