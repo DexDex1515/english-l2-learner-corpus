@@ -70,7 +70,7 @@ combined_spanish %>%
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 summary(lm(combined_mandarin$noun_per_sentence~combined_mandarin$num_uniq_word))
-ggplot(combined_mandarin, aes(x=log(num_uniq_word), y=noun_per_sentence/verb_per_sentence)) + geom_point() + stat_smooth(method='lm')
+ggplot(combined_mandarin, aes(x=num_uniq_word, y=noun_per_sentence/verb_per_sentence)) + geom_point() + stat_smooth(method='lm')
 ```
 
 
@@ -99,6 +99,25 @@ combined_spanish %>%
         subtitle="Number of uniq words vs. Frequency of \"the\", Spanish corpus")
 ```
 
+Plotting a freq vs. the freq
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+combined_mandarin %>%
+  ggplot(aes(x=aan_freq, y=the_freq, color=Score_Level)) +
+  geom_point() +
+  stat_smooth(method='lm') +
+  labs(x= "Frequency of a/an",
+        subtitle="Frequency of the vs. Frequency of a/an, Mandarin corpus")
+```
+
+Plotting a freq vs. the freq
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+combined_mandarin %>%
+  ggplot(aes(x=this_freq, y=the_freq, color=Score_Level)) +
+  geom_point() +
+  stat_smooth(method='lm') +
+  labs(x= "Frequency of this",
+        subtitle="Frequency of the vs. Frequency of this, Mandarin corpus")
+```
 
 Only looking at essays with high scores
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
