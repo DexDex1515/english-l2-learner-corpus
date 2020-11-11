@@ -1,0 +1,64 @@
+---
+author: "Linghai Liu"
+date: "11/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+work.dir <- "C:/Users/brave/Desktop/CLPS1360/Final Project/english-l2-learner-corpus/"
+setwd(work.dir)
+require(tidyverse)
+options(stringAsFactors=FALSE)
+```
+Loading and combining data
+```{r loading, incluede=TRUE, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+mandarin <- read_csv(paste(work.dir, "cleaned_csv/mandarin_L1_nltk.csv", sep=""))
+spanish <- read_csv(paste(work.dir, "cleaned_csv/spanish_L1_nltk.csv", sep=""))
+m_2 <- read_csv((paste(work.dir, "cleaned_csv/mandarin_l1_lemmatizer_column.csv", sep="")))
+s_2 <- read_csv((paste(work.dir, "cleaned_csv/spanish_l1_lemmatizer_column.csv", sep="")))
+mandarin <- inner_join(mandarin, m_2, by=c("Filename"="file_id"))
+spanish <- inner_join(spanish, s_2, by=c("Filename"="file_id"))
+head(mandarin)
+```
+```{r plotting1, incluede=TRUE, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+ggplot() + 
+  geom_density(data=mandarin, aes(x=num_uniq_word, color=Score_Level))
+ggplot() + 
+  geom_density(data=spanish, aes(x=num_uniq_word, color=Score_Level))
+```
+```{r plotting2, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+mandarin$demo_freq <- mandarin$this_freq + mandarin$that_freq + mandarin$these_freq + mandarin$those_freq
+spanish$demo_freq <- spanish$this_freq + spanish$that_freq + spanish$these_freq + spanish$those_freq
+
+ggplot(mandarin) + 
+  geom_density(aes(x=demo_freq, color=Score_Level))
+
+ggplot(spanish) + 
+  geom_density(aes(x=demo_freq, color=Score_Level))
+```
+
+```{r plotting3, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+mandarin$art_freq <- mandarin$the_freq + mandarin$aan_freq
+
+spanish$art_freq <- spanish$the_freq + spanish$aan_freq
+
+mandarin$demo_count <- mandarin$this_count + mandarin$that_count + mandarin$these_count + mandarin$those_count
+mandarin$art_count <- mandarin$the_count + mandarin$aan_count
+mandarin$demo_PSP <- mandarin$demo_freq + mandarin$PRP_freq
+ggplot(mandarin, aes(x=num_uniq_word)) +
+  
+  geom_point(aes(y=demo_PSP), color="blue") + 
+  geom_smooth(aes(y=demo_PSP), color="red") + 
+  geom_point(aes(y=art_freq)) +
+  geom_smooth(aes(y=art_freq), color="green")
+  
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = "Demo Axis",
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*1, name="art Axis")
+  )
+
+```
