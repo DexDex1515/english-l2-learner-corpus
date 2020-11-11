@@ -87,7 +87,7 @@ combined_mandarin %>%
   geom_point() +
   stat_smooth(method='lm') +
   labs(x= "Number of unique words in an essay",
-        subtitle="Number of uniq words vs. Frequency of \"the\", Mandarin corpus")
+        subtitle="Number of uniq words vs. Frequency of \"this\", Mandarin corpus")
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -96,7 +96,7 @@ combined_spanish %>%
   geom_point() +
   stat_smooth(method='lm') +
   labs(x= "Number of unique words in an essay",
-        subtitle="Number of uniq words vs. Frequency of \"the\", Spanish corpus")
+        subtitle="Number of uniq words vs. Frequency of \"this\", Spanish corpus")
 ```
 
 Plotting a freq vs. the freq
@@ -117,6 +117,55 @@ combined_mandarin %>%
   stat_smooth(method='lm') +
   labs(x= "Frequency of this",
         subtitle="Frequency of the vs. Frequency of this, Mandarin corpus")
+```
+
+Plotting this freq
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+combined_mandarin %>%
+  ggplot(aes(x=num_uniq_word, y=this_freq+that_freq+these_freq+those_freq)) +
+  geom_point() +
+  stat_smooth(method='lm') +
+  labs(x= "Frequency of this",
+        subtitle="Frequency of the vs. Frequency of this, Mandarin corpus")
+```
+
+plot 2 lines: freq of demonstratives and freq of definite articles for mandarin speakers
+x axis: num unique words
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(combined_mandarin, aes(x=num_uniq_word)) +
+  geom_point(aes(y=the_freq), col="blue") +
+  geom_point(aes(y=this_freq+that_freq+these_freq+those_freq), col="red") + 
+  geom_smooth(aes(y=the_freq), col="green") +
+  geom_smooth(aes(y=this_freq+that_freq+these_freq+those_freq), col="green") +
+  scale_y_continuous(name="the", sec.axis=sec_axis(~ ., name="demonstratives")) +
+  theme(
+    axis.title.y.left=element_text(color="blue"),
+    axis.text.y.left=element_text(color="blue"),
+    axis.title.y.right=element_text(color="red"),
+    axis.text.y.right=element_text(color="red")
+  ) + 
+  labs(subtitle="Frequency of \"the\" and the 4 demonstratives, Mandarin corpus")
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(combined_spanish, aes(x=num_uniq_word)) +
+  geom_point(aes(y=the_freq), col="blue") +
+  geom_point(aes(y=this_freq+that_freq+these_freq+those_freq), col="red") + 
+  geom_smooth(aes(y=the_freq), col="green") +
+  geom_smooth(aes(y=this_freq+that_freq+these_freq+those_freq), col="green") +
+  scale_y_continuous(name="the", sec.axis=sec_axis(~ ., name="demonstratives")) +
+  theme(
+    axis.title.y.left=element_text(color="blue"),
+    axis.text.y.left=element_text(color="blue"),
+    axis.title.y.right=element_text(color="red"),
+    axis.text.y.right=element_text(color="red")
+  ) + 
+  labs(subtitle="Frequency of \"the\" and the 4 demonstratives, Spanish corpus")
+
 ```
 
 Only looking at essays with high scores
