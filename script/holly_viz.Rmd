@@ -83,30 +83,67 @@ ggplot(combined_mandarin, aes(x=noun_count, y=the_count, color=Score_Level)) + g
 Plotting num uniq word vs. the freq
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 combined_mandarin %>%
-  ggplot(aes(x=num_uniq_word, y=this_freq, color=Score_Level)) +
+  ggplot(aes(x=num_uniq_word, y=log(the_freq), color=Score_Level)) +
   geom_point() +
   stat_smooth(method='lm') +
   labs(x= "Number of unique words in an essay",
-        subtitle="Number of uniq words vs. Frequency of \"this\", Mandarin corpus")
+        subtitle="Number of uniq words vs. Log frequency of \"the\", Mandarin corpus")
+
+combined_spanish %>%
+  ggplot(aes(x=num_uniq_word, y=log(the_freq), color=Score_Level)) +
+  geom_point() +
+  stat_smooth(method='lm') +
+  labs(x= "Number of unique words in an essay",
+        subtitle="Number of uniq words vs. Log frequency of \"the\", Spanish corpus")
 ```
 
+
+"The" frequency plotted against number of noun per sentence 
+--- different score levels seem to have similar slope (all are pretty weak though)
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-combined_spanish %>%
-  ggplot(aes(x=num_uniq_word, y=this_freq, color=Score_Level)) +
+combined_mandarin %>%
+  ggplot(aes(x=noun_per_sentence, y=log(the_freq), color=Score_Level)) +
   geom_point() +
+  xlim(0, 15) + 
   stat_smooth(method='lm') +
-  labs(x= "Number of unique words in an essay",
-        subtitle="Number of uniq words vs. Frequency of \"this\", Spanish corpus")
+  labs(subtitle="Number of noun per sentence vs. Log frequency of \"the\", Mandarin corpus")
+
+
+combined_spanish %>%
+  ggplot(aes(x=noun_per_sentence, y=log(the_freq), color=Score_Level)) +
+  geom_point() +
+  xlim(0, 15) + 
+  stat_smooth(method='lm') +
+  labs(subtitle="Number of noun per sentence vs. Log frequency of \"the\", Spanish corpus")
+
 ```
 
 Plotting a freq vs. the freq
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 combined_mandarin %>%
-  ggplot(aes(x=aan_freq, y=the_freq, color=Score_Level)) +
+  ggplot(aes(x=log(aan_freq), y=log(the_freq), color=Score_Level)) +
   geom_point() +
   stat_smooth(method='lm') +
   labs(x= "Frequency of a/an",
         subtitle="Frequency of the vs. Frequency of a/an, Mandarin corpus")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+combined_mandarin %>%
+  ggplot(aes(x=num_uniq_word, y=log(the_freq)/log(aan_freq), color=Score_Level)) +
+  geom_point() +
+  stat_smooth(method='lm') +
+  labs(subtitle="Ratio between the freq and aan freq, Mandarin corpus")
+```
+
+Density plot for ratio between the and a/an --- almost overlapping
+```{r}
+combined_mandarin %>%
+  ggplot(aes(x=log(the_freq)/log(aan_freq), color=Score_Level, fill=Score_Level)) +
+  geom_density(alpha=0.3,size=1)+ 
+  #geom_vline(data=num_uniq_word_by_score_mandarin, aes(xintercept = median, color = Score_Level), size=1.5)+ 
+  labs(x= "Ratio between the freq and aan freq, Mandarin corpus")+
+  theme(legend.position="bottom")
 ```
 
 Plotting a freq vs. the freq
@@ -117,6 +154,26 @@ combined_mandarin %>%
   stat_smooth(method='lm') +
   labs(x= "Frequency of this",
         subtitle="Frequency of the vs. Frequency of this, Mandarin corpus")
+```
+
+Density plot for ratio between the and demonstratives --- high and medium are almost overlapping, low is different
+```{r}
+combined_mandarin %>%
+  ggplot(aes(x=log(the_freq)/log(this_freq), color=Score_Level, fill=Score_Level)) +
+  geom_density(alpha=0.3,size=1)+ 
+  #geom_vline(data=num_uniq_word_by_score_mandarin, aes(xintercept = median, color = Score_Level), size=1.5)+ 
+  labs(x= "Ratio between the freq and this freq, Mandarin corpus")+
+  theme(legend.position="bottom")
+```
+
+Ratio between the freq and other det freq
+```{r}
+combined_mandarin %>%
+  ggplot(aes(x=log(the_freq)/log(other_det_freq), color=Score_Level, fill=Score_Level)) +
+  geom_density(alpha=0.3,size=1)+ 
+  #geom_vline(data=num_uniq_word_by_score_mandarin, aes(xintercept = median, color = Score_Level), size=1.5)+ 
+  labs(x= "Ratio between the freq and other det freq, Mandarin corpus")+
+  theme(legend.position="bottom")
 ```
 
 Plotting this freq
@@ -135,10 +192,10 @@ x axis: num unique words
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 ggplot(combined_mandarin, aes(x=num_uniq_word)) +
-  geom_point(aes(y=the_freq), col="blue") +
-  geom_point(aes(y=this_freq+that_freq+these_freq+those_freq), col="red") + 
-  geom_smooth(aes(y=the_freq), col="green") +
-  geom_smooth(aes(y=this_freq+that_freq+these_freq+those_freq), col="green") +
+  geom_point(aes(y=log(the_freq)), col="blue") +
+  geom_point(aes(y=log(this_freq+that_freq+these_freq+those_freq)), col="red") + 
+  geom_smooth(aes(y=log(the_freq)), col="green") +
+  geom_smooth(aes(y=log(this_freq+that_freq+these_freq+those_freq)), col="green") +
   scale_y_continuous(name="the", sec.axis=sec_axis(~ ., name="demonstratives")) +
   theme(
     axis.title.y.left=element_text(color="blue"),
@@ -146,17 +203,17 @@ ggplot(combined_mandarin, aes(x=num_uniq_word)) +
     axis.title.y.right=element_text(color="red"),
     axis.text.y.right=element_text(color="red")
   ) + 
-  labs(subtitle="Frequency of \"the\" and the 4 demonstratives, Mandarin corpus")
+  labs(subtitle="Log frequency of \"the\" and the 4 demonstratives, Mandarin corpus")
 
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 ggplot(combined_spanish, aes(x=num_uniq_word)) +
-  geom_point(aes(y=the_freq), col="blue") +
-  geom_point(aes(y=this_freq+that_freq+these_freq+those_freq), col="red") + 
-  geom_smooth(aes(y=the_freq), col="green") +
-  geom_smooth(aes(y=this_freq+that_freq+these_freq+those_freq), col="green") +
+  geom_point(aes(y=log(the_freq)), col="blue") +
+  geom_point(aes(y=log(this_freq+that_freq+these_freq+those_freq)), col="red") + 
+  geom_smooth(aes(y=log(the_freq)), col="green") +
+  geom_smooth(aes(y=log(this_freq+that_freq+these_freq+those_freq)), col="green") +
   scale_y_continuous(name="the", sec.axis=sec_axis(~ ., name="demonstratives")) +
   theme(
     axis.title.y.left=element_text(color="blue"),
