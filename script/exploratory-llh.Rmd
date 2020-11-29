@@ -18,23 +18,132 @@ m_2 <- read_csv((paste(work.dir, "cleaned_csv/mandarin_l1_lemmatizer_column.csv"
 s_2 <- read_csv((paste(work.dir, "cleaned_csv/spanish_l1_lemmatizer_column.csv", sep="")))
 mandarin <- inner_join(mandarin, m_2, by=c("Filename"="file_id"))
 spanish <- inner_join(spanish, s_2, by=c("Filename"="file_id"))
-head(mandarin)
+```
+```{r process&subset, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+mandarin$demo_freq <- mandarin$this_freq + mandarin$that_freq + mandarin$these_freq + mandarin$those_freq
+spanish$demo_freq <- spanish$this_freq + spanish$that_freq + spanish$these_freq + spanish$those_freq
+mandarin$art_freq <- mandarin$the_freq + mandarin$aan_freq
+spanish$art_freq <- spanish$the_freq + spanish$aan_freq
+mandarin <- mandarin %>%
+  mutate(
+    the_freq = log(the_freq),
+    aan_freq = log(aan_freq),
+    demo_freq = log(demo_freq),
+    PRP_freq = log(PRP_freq), 
+    other_det_freq = log(other_det_freq), 
+    one_freq = log(one_freq)
+  )
+spanish <- spanish %>%
+  mutate(
+    the_freq = log(the_freq),
+    aan_freq = log(aan_freq),
+    demo_freq = log(demo_freq),
+    PRP_freq = log(PRP_freq), 
+    other_det_freq = log(other_det_freq), 
+    one_freq = log(one_freq)
+  )
+mandarin.low <- mandarin %>%
+  filter(Score_Level == 'low')
+mandarin.mid <- mandarin %>%
+  filter(Score_Level == 'medium')
+mandarin.high <- mandarin %>%
+  filter(Score_Level =='high')
+spanish.low <- spanish %>%
+  filter(Score_Level == 'low')
+spanish.mid <- spanish %>%
+  filter(Score_Level == 'medium')
+spanish.high <- spanish %>%
+  filter(Score_Level =='high')
+# summary(mandarin.low)
+# summary(mandarin.mid)
+# summary(mandarin.high)
 ```
 ```{r plotting1, incluede=TRUE, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
 ggplot() + 
-  geom_density(data=mandarin, aes(x=num_uniq_word, color=Score_Level))
+  geom_density(data=mandarin, aes(x=num_uniq_word, color=Score_Level), size=1)
 ggplot() + 
-  geom_density(data=spanish, aes(x=num_uniq_word, color=Score_Level))
+  geom_density(data=spanish, aes(x=num_uniq_word, color=Score_Level), size=1)
 ```
 ```{r plotting2, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
-mandarin$demo_freq <- mandarin$this_freq + mandarin$that_freq + mandarin$these_freq + mandarin$those_freq
-spanish$demo_freq <- spanish$this_freq + spanish$that_freq + spanish$these_freq + spanish$those_freq
+
 
 ggplot(mandarin) + 
-  geom_density(aes(x=demo_freq, color=Score_Level))
+  geom_density(aes(x=demo_freq, color=Score_Level), size=0.8)
 
 ggplot(spanish) + 
-  geom_density(aes(x=demo_freq, color=Score_Level))
+  geom_density(aes(x=demo_freq, color=Score_Level), size=0.8)
+```
+```{r plotting2, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+ggplot(mandarin) + 
+  geom_density(aes(x=the_freq, color=Score_Level), size=0.8)
+
+ggplot(spanish) + 
+  geom_density(aes(x=the_freq, color=Score_Level), size=0.8)
+```
+```{r plotting2, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+ggplot(mandarin) + 
+  geom_density(aes(x=PRP_freq, color=Score_Level), size=0.8)
+
+ggplot(spanish) + 
+  geom_density(aes(x=PRP_freq, color=Score_Level), size=0.8)
+```
+```{r plotting2, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+ggplot(mandarin) + 
+  geom_density(aes(x=other_det_freq, color=Score_Level), size=0.8)
+
+ggplot(spanish) + 
+  geom_density(aes(x=other_det_freq, color=Score_Level), size=0.8)
+```
+
+```{r plotting2, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+ggplot(mandarin) + 
+  geom_density(aes(x=aan_freq, color=Score_Level), size=0.8)
+
+ggplot(spanish) + 
+  geom_density(aes(x=aan_freq, color=Score_Level), size=0.8)
+```
+```{r plotting2, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+ggplot(mandarin) + 
+  geom_density(aes(x=one_freq, color=Score_Level), size=0.8)
+
+ggplot(spanish) + 
+  geom_density(aes(x=one_freq, color=Score_Level), size=0.8)
+```
+
+```{r plotting3, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+mandarin$art_freq <- mandarin$the_freq + mandarin$aan_freq
+
+spanish$art_freq <- spanish$the_freq + spanish$aan_freq
+
+mandarin$demo_count <- mandarin$this_count + mandarin$that_count + mandarin$these_count + mandarin$those_count
+mandarin$art_count <- mandarin$the_count + mandarin$aan_count
+mandarin$demo_PSP <- mandarin$demo_freq + mandarin$PRP_freq
+
+ggplot(mandarin) +
+  geom_density(aes(x = PRP_freq, color=Score_Level))
+ggplot(mandarin) +
+  geom_density(aes(x = art_freq, color=Score_Level))
+
+```
+```{r plotting3, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+ggplot(mandarin, aes(x=art_freq, y=demo_PSP, color=Score_Level)) +
+  geom_point() +
+  stat_smooth(method="lm")
+summary(lm(demo_PSP ~ art_freq, data=mandarin))
+
+mandarin.art.freq <- mandarin %>%
+  group_by(Score_Level) %>%
+  summarize(mean.art.freq = mean(art_freq))
+mandarin.demo.freq <- mandarin %>%
+  group_by(Score_Level) %>%
+  summarize(mean.demo.freq = mean(demo_freq))
+mandarin.prp.freq <- mandarin %>%
+  group_by(Score_Level) %>%
+  summarize(mean.prp.freq = mean(PRP_freq))
+
+mandarin.freq.byScore <- inner_join(mandarin.art.freq, mandarin.demo.freq)
+mandarin.freq.byScore <- inner_join(mandarin.freq.byScore, mandarin.prp.freq)
+head(mandarin.freq.byScore)
 ```
 
 ```{r plotting3, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
@@ -61,4 +170,11 @@ ggplot(mandarin, aes(x=num_uniq_word)) +
     sec.axis = sec_axis(~.*1, name="art Axis")
   )
 
+```
+```{r demo-and-def, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+mandarin$ratio <- mandarin$demo_freq / mandarin$the_freq
+summary(mandarin$ratio)
+mandarin1 <- filter(mandarin1, log(num_uniq_word) > 3)
+summary(lm(mandarin1$ratio ~ mandarin1$num_uniq_word))
+ggplot(mandarin1, aes(x=num_uniq_word, y=ratio)) + geom_point() + stat_smooth(method='lm')
 ```
