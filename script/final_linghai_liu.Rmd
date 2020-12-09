@@ -1,0 +1,82 @@
+---
+title: "final"
+author: "Linghai Liu"
+date: "12/9/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+work.dir <- "C:/Users/brave/Desktop/CLPS1360/Final Project/english-l2-learner-corpus/"
+setwd(work.dir)
+require(tidyverse)
+options(stringAsFactors=FALSE)
+```
+Loading and combining data
+```{r loading, include=TRUE, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+mandarin <- read_csv(paste(work.dir, "cleaned_csv/mandarin_L1_nltk.csv", sep=""))
+spanish <- read_csv(paste(work.dir, "cleaned_csv/spanish_L1_nltk.csv", sep=""))
+m_2 <- read_csv((paste(work.dir, "cleaned_csv/mandarin_l1_lemmatizer_column.csv", sep="")))
+s_2 <- read_csv((paste(work.dir, "cleaned_csv/spanish_l1_lemmatizer_column.csv", sep="")))
+mandarin <- inner_join(mandarin, m_2, by=c("Filename"="file_id"))
+spanish <- inner_join(spanish, s_2, by=c("Filename"="file_id"))
+```
+```{r process&subset, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
+mandarin$demo_freq <- mandarin$this_freq + mandarin$that_freq + mandarin$these_freq + mandarin$those_freq
+spanish$demo_freq <- spanish$this_freq + spanish$that_freq + spanish$these_freq + spanish$those_freq
+mandarin$art_freq <- mandarin$the_freq + mandarin$aan_freq
+spanish$art_freq <- spanish$the_freq + spanish$aan_freq
+mandarin <- mandarin %>%
+  mutate(
+    the_log = log(the_freq),
+    aan_log = log(aan_freq),
+    demo_log = log(demo_freq),
+    PRP_log = log(PRP_freq), 
+    other_det_log = log(other_det_freq), 
+    one_log = log(one_freq)
+  )
+spanish <- spanish %>%
+  mutate(
+    the_log = log(the_freq),
+    aan_log = log(aan_freq),
+    demo_log = log(demo_freq),
+    PRP_log = log(PRP_freq), 
+    other_det_log = log(other_det_freq), 
+    one_log = log(one_freq)
+  )
+mandarin.low <- mandarin %>%
+  filter(Score_Level == 'low')
+mandarin.mid <- mandarin %>%
+  filter(Score_Level == 'medium')
+mandarin.high <- mandarin %>%
+  filter(Score_Level =='high')
+spanish.low <- spanish %>%
+  filter(Score_Level == 'low')
+spanish.mid <- spanish %>%
+  filter(Score_Level == 'medium')
+spanish.high <- spanish %>%
+  filter(Score_Level =='high')
+mandarin$ratio <- log(mandarin$demo_freq / mandarin$the_freq)
+```
+```{r table1, collapse=TRUE, warning=FALSE, comment=""}
+factorsnames <- c("DEF.art", "IND.art", "DEMO", "PRP", "Other.DET", "ONE")
+
+low.m <- c(sd(mandarin.low$the_freq), sd(mandarin.low$aan_freq), sd(mandarin.low$demo_freq), sd(mandarin.low$PRP_freq), sd(mandarin.low$other_det_freq), sd(mandarin.low$one_freq))
+mid.m <- c(sd(mandarin.mid$the_freq), sd(mandarin.mid$aan_freq), sd(mandarin.mid$demo_freq), sd(mandarin.mid$PRP_freq), sd(mandarin.mid$other_det_freq), sd(mandarin.mid$one_freq))
+high.m <- c(sd(mandarin.high$the_freq), sd(mandarin.high$aan_freq), sd(mandarin.high$demo_freq), sd(mandarin.high$PRP_freq), sd(mandarin.high$other_det_freq), sd(mandarin.high$one_freq))
+sd.mandarin <- data.frame(rbind(low.m, mid.m, high.m))
+colnames(sd.mandarin) <- factorsnames
+sd.mandarin
+
+low.s <- c(sd(spanish.low$the_freq), sd(spanish.low$aan_freq), sd(spanish.low$demo_freq), sd(spanish.low$PRP_freq), sd(spanish.low$other_det_freq), sd(spanish.low$one_freq))
+mid.s <- c(sd(spanish.mid$the_freq), sd(spanish.mid$aan_freq), sd(spanish.mid$demo_freq), sd(spanish.mid$PRP_freq), sd(spanish.mid$other_det_freq), sd(spanish.mid$one_freq))
+high.s <- c(sd(spanish.high$the_freq), sd(spanish.high$aan_freq), sd(spanish.high$demo_freq), sd(spanish.high$PRP_freq), sd(spanish.high$other_det_freq), sd(spanish.high$one_freq))
+sd.spanish <- data.frame(rbind(low.s, mid.s, high.s))
+colnames(sd.spanish) <- factorsnames
+sd.spanish
+```
+```{r figure7, collapse=TRUE, warning=FALSE, comment=""}
+# Get rid of +/- infinity of log(demo_freq / the_freq)
+mandarin1 <- filter(mandarin, ratio < 1000000) 
+mandarin1 <- filter(mandarin1, ratio > -1000000)
+summary(lm(mandarin1$ratio ~ log(mandarin1$num_uniq_word)))
+```
