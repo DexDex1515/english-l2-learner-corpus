@@ -26,21 +26,21 @@ mandarin$art_freq <- mandarin$the_freq + mandarin$aan_freq
 spanish$art_freq <- spanish$the_freq + spanish$aan_freq
 mandarin <- mandarin %>%
   mutate(
-    the_freq = log(the_freq),
-    aan_freq = log(aan_freq),
-    demo_freq = log(demo_freq),
-    PRP_freq = log(PRP_freq), 
-    other_det_freq = log(other_det_freq), 
-    one_freq = log(one_freq)
+    the_log = log(the_freq),
+    aan_log = log(aan_freq),
+    demo_log = log(demo_freq),
+    PRP_log = log(PRP_freq), 
+    other_det_log = log(other_det_freq), 
+    one_log = log(one_freq)
   )
 spanish <- spanish %>%
   mutate(
-    the_freq = log(the_freq),
-    aan_freq = log(aan_freq),
-    demo_freq = log(demo_freq),
-    PRP_freq = log(PRP_freq), 
-    other_det_freq = log(other_det_freq), 
-    one_freq = log(one_freq)
+    the_log = log(the_freq),
+    aan_log = log(aan_freq),
+    demo_log = log(demo_freq),
+    PRP_log = log(PRP_freq), 
+    other_det_log = log(other_det_freq), 
+    one_log = log(one_freq)
   )
 mandarin.low <- mandarin %>%
   filter(Score_Level == 'low')
@@ -172,9 +172,9 @@ ggplot(mandarin, aes(x=num_uniq_word)) +
 
 ```
 ```{r demo-and-def, collapse=TRUE, warning=FALSE, message=FALSE, comment=""}
-mandarin$ratio <- mandarin$demo_freq / mandarin$the_freq
-summary(mandarin$ratio)
-mandarin1 <- filter(mandarin1, log(num_uniq_word) > 3)
-summary(lm(mandarin1$ratio ~ mandarin1$num_uniq_word))
-ggplot(mandarin1, aes(x=num_uniq_word, y=ratio)) + geom_point() + stat_smooth(method='lm')
+# mandarin$ratio <- log(mandarin$demo_freq / mandarin$the_freq)
+#summary(mandarin$ratio)
+# mandarin1 <- filter(mandarin, log(num_uniq_word) > 3)
+summary(lm(mandarin$ratio ~ mandarin$log_word))
+ggplot(mandarin1, aes(x=log_word, y=ratio)) + geom_point() + stat_smooth(method='lm')
 ```
