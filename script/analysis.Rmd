@@ -1,0 +1,235 @@
+---
+title: "Analysis"
+output: html_document
+---
+
+[Note: We have included anaysis and interpretations for each of these models and plots in our writeup, so here, we present only the code and very brief explanation.]
+
+```{r setup, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(tidyverse)
+options(stringsAsFactors=F)
+```
+
+
+Load data for Mandarin corpus
+```{r message=FALSE, warning=FALSE}
+mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/mandarin_L1_nltk.csv')
+count_uniq_words_mandarin <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/mandarin_l1_lemmatizer_column.csv')
+
+combined_mandarin <- inner_join(mandarin, count_uniq_words_mandarin, by=c("Filename"="file_id"))
+```
+
+Load data for Spanish corpus
+```{r message=FALSE, warning=FALSE}
+spanish <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/spanish_L1_nltk.csv')
+count_uniq_words_spanish <- read_csv('/Users/Yuqi/Desktop/english-l2-learner-corpus/cleaned_csv/spanish_l1_lemmatizer_column.csv')
+
+combined_spanish <- inner_join(spanish, count_uniq_words_spanish, by=c("Filename"="file_id"))
+```
+
+### Proxies for English proficiency
+
+Density plot of number of unique words, categorized by score level. 
+Higher number of unique words leads to higher score level.
+
+Mandarin L1 corpus
+```{r message=FALSE, warning=FALSE}
+num_uniq_word_by_score_mandarin <- combined_mandarin %>%
+  group_by(Score_Level) %>%
+  summarize(median=median(log(num_uniq_word)))
+
+combined_mandarin %>%
+  ggplot(aes(x=log(num_uniq_word), color=Score_Level, fill=Score_Level)) +
+  geom_density(alpha=0.3,size=1)+ 
+  xlim(4,6)+
+  geom_vline(data=num_uniq_word_by_score_mandarin, aes(xintercept = median, color = Score_Level), size=1.5)+ 
+  labs(x= "Logged number of unique words in an essay")
+  theme(legend.position="bottom")
+``` 
+
+Spanish L1 corpus
+```{r message=FALSE, warning=FALSE}
+num_uniq_word_by_score_spanish <- combined_spanish %>%
+  group_by(Score_Level) %>%
+  summarize(median=median(log(num_uniq_word)))
+
+combined_spanish %>%
+  ggplot(aes(x=log(num_uniq_word), color=Score_Level, fill=Score_Level)) +
+  geom_density(alpha=0.3,size=1)+ 
+  geom_vline(data=num_uniq_word_by_score_spanish, aes(xintercept = median, color = Score_Level), size=1.5)+ 
+  labs(x= "Logged number of unique words in an essay")
+``` 
+
+PCA based on sentence complexity metrics, Mandarin L1 corpus
+Out of the two significant principle values, PC2 seems to have the more positive effect. Number of unique words is the most important factor in PC2. 
+This shows that number of unique words is the best predictor for essay's score levels
+```{r message=FALSE, warning=FALSE}
+sent_complex_mandarin <- 
+  combined_mandarin %>%
+  mutate(avg_sent_len=essay_len/num_sentence) %>%
+  mutate(the_aan_ratio=the_count/(aan_count + 1)) %>%
+  mutate(score_level_num=ifelse(Score_Level=="low", 1, ifelse(Score_Level=="medium", 2, 3))) %>%
+  select(noun_per_sentence, num_uniq_word, avg_sent_len, Score_Level, score_level_num) 
+
+(sent_complex_pca_mandarin <- 
+  prcomp(sent_complex_mandarin[c('noun_per_sentence', 'num_uniq_word', 'avg_sent_len')],center=T, scale=T))
+
+sent_complex_pca_mandarin$rotation
+
+summary(lm(sent_complex_mandarin$score_level_num
+           ~ sent_complex_pca_mandarin$x[,"PC1"] +
+               sent_complex_pca_mandarin$x[,"PC2"] +
+               sent_complex_pca_mandarin$x[,"PC3"]))
+```
+
+A similar patterns is presented in the Spanish L1 corpus, where number of unique words is the best predictor. 
+PC1 seems to have the most significant and positive effect, and number of unique words is the most important factor in PC1. 
+```{r message=FALSE, warning=FALSE}
+sent_complex_spanish <- 
+  combined_spanish %>%
+  mutate(avg_sent_len=essay_len/num_sentence) %>%
+  mutate(the_aan_ratio=the_count/(aan_count + 1)) %>%
+  mutate(score_level_num=ifelse(Score_Level=="low", 1, ifelse(Score_Level=="medium", 2, 3))) %>%
+  select(noun_per_sentence, num_uniq_word, avg_sent_len, Score_Level, score_level_num) 
+
+(sent_complex_pca_spanish <- 
+  prcomp(sent_complex_spanish[c('noun_per_sentence', 'num_uniq_word', 'avg_sent_len')],center=T, scale=T))
+
+sent_complex_pca_spanish$rotation
+
+summary(lm(sent_complex_spanish$score_level_num
+           ~ sent_complex_pca_spanish$x[,"PC1"] +
+               sent_complex_pca_spanish$x[,"PC2"] +
+               sent_complex_pca_spanish$x[,"PC3"]))
+```
+
+
+### "The" vs. demonstratives 
+
+Regression plots for the logged frequency of "the" and demonstratives against number of unique words
+```{r message=FALSE, warning=FALSE}
+ggplot(combined_mandarin, aes(x=num_uniq_word)) +
+  geom_point(aes(y=log(the_freq)), col="blue") +
+  geom_point(aes(y=log(this_freq+that_freq+these_freq+those_freq)), col="red") + 
+  geom_smooth(aes(y=log(the_freq)), col="green") +
+  geom_smooth(aes(y=log(this_freq+that_freq+these_freq+those_freq)), col="green") +
+  scale_y_continuous(name="the", sec.axis=sec_axis(~ ., name="demonstratives")) +
+  theme(
+    axis.title.y.left=element_text(color="blue"),
+    axis.text.y.left=element_text(color="blue"),
+    axis.title.y.right=element_text(color="red"),
+    axis.text.y.right=element_text(color="red")
+  ) + 
+  labs(subtitle="Log frequency of \"the\" and the 4 demonstratives, Mandarin corpus")
+
+```
+
+
+
+```{r message=FALSE, warning=FALSE}
+
+ggplot(combined_spanish, aes(x=num_uniq_word)) +
+  geom_point(aes(y=log(the_freq)), col="blue") +
+  geom_point(aes(y=log(this_freq+that_freq+these_freq+those_freq)), col="red") + 
+  geom_smooth(aes(y=log(the_freq)), col="green") +
+  geom_smooth(aes(y=log(this_freq+that_freq+these_freq+those_freq)), col="green") +
+  scale_y_continuous(name="the", sec.axis=sec_axis(~ ., name="demonstratives")) +
+  theme(
+    axis.title.y.left=element_text(color="blue"),
+    axis.text.y.left=element_text(color="blue"),
+    axis.title.y.right=element_text(color="red"),
+    axis.text.y.right=element_text(color="red")
+  ) + 
+  labs(subtitle="Log frequency of \"the\" and the 4 demonstratives, Spanish corpus")
+
+```
+
+Density plots for the ratio between "the" and demonstratives for both corpora.
+
+```{r message=FALSE, warning=FALSE}
+the_demo_ratio_mandarin <- combined_mandarin %>%
+  group_by(Score_Level) %>%
+  summarize(average=mean(the_count/(this_count+these_count+that_count+those_count+1), na.rm=TRUE))%>%
+  mutate(average=log(average))
+
+combined_mandarin %>%
+  ggplot(aes(x=log(the_count/(this_count+these_count+that_count+those_count)), color=Score_Level, fill=Score_Level)) +
+  geom_density(alpha=0.3,size=1)+ 
+  geom_vline(data=the_demo_ratio_mandarin, aes(xintercept = average, color = Score_Level), size=1)+ 
+  xlim(0, 5) + 
+  labs(x= "Logged ratio between number of \"the\" and number of demonstratives, Mandarin L1 corpus")
+```
+
+Regression result between the ratio of demonstratives and "the" against number of unique words shows very low correlation.
+
+```{r message=FALSE, warning=FALSE}
+combined_mandarin_the_demo_ratio <- combined_mandarin %>%
+  mutate(ratio=log(the_freq/(this_freq+that_freq+these_freq+those_freq))) %>%
+  filter(ratio < 10000) %>%
+  filter(ratio > -10000) %>%
+  select(ratio, num_uniq_word)
+summary(lm(combined_mandarin_the_demo_ratio$ratio ~ log(combined_mandarin_the_demo_ratio$num_uniq_word)))
+```
+
+```{r message=FALSE, warning=FALSE}
+the_demo_ratio_spanish <- combined_spanish %>%
+  group_by(Score_Level) %>%
+  summarize(average=mean(the_count/(this_count+these_count+that_count+those_count+1), na.rm=TRUE))%>%
+  mutate(average=log(average))
+
+combined_spanish %>%
+  ggplot(aes(x=log(the_count/(this_count+these_count+that_count+those_count)), color=Score_Level, fill=Score_Level)) +
+  geom_density(alpha=0.3,size=1)+ 
+  geom_vline(data=the_demo_ratio_spanish, aes(xintercept = average, color = Score_Level), size=1)+ 
+  xlim(0, 5) + 
+  labs(x= "Logged ratio between number of \"the\" and number of demonstratives, Spanish L1 corpus")
+```
+
+### "The" vs. "a"/"an"
+
+In Mandarin L1 corpus, frequency of "a" and "an" increases slightly as number of unique words increases. 
+
+```{r message=FALSE, warning=FALSE}
+combined_mandarin %>%
+  ggplot(aes(x=num_uniq_word, y=log(aan_freq))) +
+  geom_point() +
+  stat_smooth() +
+  labs(subtitle="Logged frequency of a/an vs. number of unique words, Mandarin corpus")
+```
+
+
+Density plot for ratio between "the" and "a/an", Mandarin L1 corpus
+```{r message=FALSE, warning=FALSE}
+the_aan_ratio_mandarin <- combined_mandarin %>%
+  group_by(Score_Level) %>%
+  summarize(median=median(log(the_count/aan_count), na.rm=TRUE))
+head(the_aan_ratio_mandarin)
+
+combined_mandarin %>%
+  ggplot(aes(x=log(the_count/aan_count), color=Score_Level, fill=Score_Level)) +
+  geom_density(alpha=0.3,size=1)+ 
+  geom_vline(data=the_aan_ratio_mandarin, aes(xintercept = median, color = Score_Level), size=1)+ 
+  xlim(0, 5) + 
+  labs(x= "Log-transformed ratio between number of \"the\" and number of \"a/an\", Mandarin corpus")+
+  theme(legend.position="bottom")
+```
+
+### "The" vs. Other Determiners 
+
+Density plots for the ratio between "the" and other determiners
+```{r message=FALSE, warning=FALSE}
+the_other_ratio_mandarin <- combined_mandarin %>%
+  group_by(Score_Level) %>%
+  summarize(median=median(log(the_count/other_det_count), na.rm=TRUE))
+
+combined_mandarin %>%
+  ggplot(aes(x=log(the_count/other_det_count), color=Score_Level, fill=Score_Level)) +
+  geom_density(alpha=0.3,size=1)+ 
+  xlim(0, 5)+ 
+  geom_vline(data=the_other_ratio_mandarin, aes(xintercept = median, color = Score_Level), size=1)+ 
+  labs(x= "Logged ratio between number of \"the\" and other determiners, Mandarin corpus")+
+  theme(legend.position="bottom")
+```
+
+
